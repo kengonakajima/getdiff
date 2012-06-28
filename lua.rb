@@ -16,20 +16,24 @@ end
 class LuaDiffEngine
 
   def initialize(oldpath,newpath)
-    oldary = eval( cmd( "ruby lua-parser/lua2sexp -a #{oldpath}" ) )
+    if oldpath then
+      oldary = eval( cmd( "ruby lua-parser/lua2sexp -a #{oldpath}" ) )
+      oldcom = eval( cmd( "ruby lua-parser/lua2sexp -c #{oldpath}" ) )
+    else
+      oldary=[]
+      oldcom=[:comments]
+    end    
     newary = eval( cmd( "ruby lua-parser/lua2sexp -a #{newpath}" ) )
     if typeof(oldary) != Array or typeof(newary) != Array then
       # todo : fallback mode
       raise "cannot parse the file: #{oldpath}, #{newpath}"
     end
-
-    oldcom = eval( cmd( "ruby lua-parser/lua2sexp -c #{oldpath}" ) )
     newcom = eval( cmd( "ruby lua-parser/lua2sexp -c #{newpath}" ) )
     if typeof(oldcom) != Array or typeof(newcom) != Array then 
       raise "cannot parse the file comment: #{oldpath}, #{newpath}"
     end
 
-    p "oldsz:#{deepcount(oldary)} newsz:#{deepcount(newary)} oldcom:#{oldcom.size} newcom:#{newcom.size}"
+#    p "oldsz:#{deepcount(oldary)} newsz:#{deepcount(newary)} oldcom:#{oldcom.size} newcom:#{newcom.size}"
 
 #    pp oldary
 
@@ -38,39 +42,80 @@ class LuaDiffEngine
   end
 
   def diff()
-    p "old:#{@oldstat.size}"
-    p "new:#{@newstat.size}"
-
+#    p "old:#{@oldstat.size}"
+#    p "new:#{@newstat.size}"
 #    pp @oldstat
 
     oldreqs={}
+    oldcoms={}
+    oldstrs={}
+    oldfuncs={}
+    oldtotal=nil
+    oldcalls=Hash.new(0)
     @oldstat.each do |v|
 #      pp v
       case v.action 
       when "require" 
-        p "REQ: #{v.name}"
         oldreqs[v.name] = v
       when "strlit"
-        p "STR: #{v.val}"
+        oldstrs[v.sha1] = v
       when "gfuncdef"
-        p "GFUN: #{v.name}"
+        oldfuncs[v.name]=v
       when "funcdef"
-        p "FUN: #{v.up} #{v.name}"
+        oldfuncs[v.name]=v
       when "total"
-        p "TOTAL: #{v.cnt}"
+        oldtotal = v.cnt
       when "call"
-        p "CALL: #{v.name} : #{v.cnt}"
+        oldcalls[v.name] = v.cnt
       when "comment"
-        p "COMMENT: #{v.val}"
+        oldcoms[v.sha1]=v
       else 
         raise "unknown action:#{v.action}"
       end
-     
     end
-    
-    
-    
-    return []
+
+    out={ :newrequires=>[], :newstrs=>[], :newfuncs=>[], :funcsizes=>[], :newcomments=>[], :totaldiff=>0, :calls=>[] }
+    newreqs={}
+    @newstat.each do |v|
+      case v.action
+      when "require"
+        newreqs[v.name]=v
+        if !oldreqs[v.name] then
+          out[:newrequires].push(v.name)
+        end
+      when "strlit"
+        if !oldstrs[v.sha1] then
+          if !newreqs[v.val] then # skip dup
+            out[:newstrs].push(v.val)
+          end
+        end
+      when "gfuncdef", "funcdef"
+        if !oldfuncs[v.name] then
+          out[:newfuncs].push({ :name=>v.name, :cnt=>v.cnt})
+        else
+          oldcnt=0
+          if oldfuncs[v.name] then
+            oldcnt = oldfuncs[v.name].cnt
+          end     
+          out[:funcsizes].push( { :name=>v.name, :diff=> (v.cnt - oldcnt ) } )
+        end
+      when "comment"
+        if !oldcoms[v.sha1] then
+          cm = v.val.dup
+          cm.sub!( /^--\s*/,"")
+          out[:newcomments].push(cm)
+        end
+      when "total"
+        out[:totaldiff] = v.cnt - oldtotal
+      when "call"
+        d = v.cnt - oldcalls[v.name]
+        if d != 0 then
+          out[:calls].push( { :name=>v.name, :diff=>d } )
+        end
+      end
+    end
+
+    return out
   end
 
   def getStat(ary,com)
@@ -92,7 +137,7 @@ class LuaDiffEngine
     return @outary
   end
 
-  def pushDefn(up,cur,sz,md )
+  def pushDefn(up,cur,cnt,md )
     if up then
       upary = up[1][1..-1]
       upary.push(up[2]) if up[2]
@@ -108,14 +153,14 @@ class LuaDiffEngine
     curary.shift if upary  # omit local var name typically
 
     if upary then
-      @outary.push( {:action=>"funcdef", :up=>upary[0], :name=>curary[0], :size=>sz, :sha1=>md } )
+      @outary.push( {:action=>"funcdef", :up=>upary[0], :name=>curary[0], :cnt=>cnt, :sha1=>md } )
     else
-      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>curary[0],:size=>sz, :sha1=>md } )
+      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>curary[0],:cnt=>cnt, :sha1=>md } )
     end
   end
 
   def scan(d,ary)
-    return if ary==nil
+    return if ary==nil or ary.size==0
     t = ary[0]
     sp = " " * d
     #  print "d:#{d} #{sp} sz:#{ary.size} #{t}\n"

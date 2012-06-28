@@ -8,13 +8,11 @@ function g_nochange(a,b,c)
 end
 
 function g_newfunc()
-  p("fuga")
+  p("fuga-new")
   call2()
 end
 
 function g_tobemodified(a,b,c,d)
-  p("tumo")
-  p("tete")
   -- newcomment
   newlit = "newnewnenewn"
 end
@@ -35,3 +33,6 @@ function Hoge()
     call3()
   end
 end
+
+call2()
+call2()

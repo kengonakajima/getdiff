@@ -4,17 +4,17 @@ require("modremove")
 
 function g_nochange(a,b,c)
   p("hoge")
+  a.b.c()
   sl="sssssss"
 end
 
 function g_toberemoved()
-  p("piyo")
+  p("piyo-toberemoved")
+  a.b.c()  
 end
 
 -- removed comment
 function g_tobemodified(a,b,c)
-  p("hage")
-  p("gugu")
   call1()
   call2()
 end

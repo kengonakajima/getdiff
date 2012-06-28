@@ -13,20 +13,19 @@ $KCODE='u'
 #
 #
 
-if ARGV.size != 2 then 
-  p "Usage: ruby diff.rb OLDPATH NEWPATH"
+oldpath,newpath = nil,nil
+
+case ARGV.size
+when 0
+  p "Usage: ruby diff.rb PATH1 [PATH2]"
   exit 1
+when 1
+  newpath = ARGV[0]
+when 2
+  oldpath, newpath = ARGV[0], ARGV[1]  
 end
 
-oldpath, newpath = ARGV[0], ARGV[1]
-
-olden = File.extname(oldpath)
-newen = File.extname(oldpath)
-if olden != newen then
-  raise "file extention differs! #{oldpath}, #{newpath}"
-end
-
-case olden
+case File.extname(ARGV[0])
 when ".lua"
   l = LuaDiffEngine.new(oldpath, newpath )
   out = l.diff()
