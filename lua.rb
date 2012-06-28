@@ -17,18 +17,18 @@ class LuaDiffEngine
 
   def initialize(oldpath,newpath)
     if oldpath then
-      oldary = eval( cmdq( "ruby lua-parser/lua2sexp -a #{oldpath}" ) )
-      oldcom = eval( cmdq( "ruby lua-parser/lua2sexp -c #{oldpath}" ) )
+      oldary = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -a #{oldpath}" ) )
+      oldcom = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -c #{oldpath}" ) )
     else
       oldary=[]
       oldcom=[:comments]
     end    
-    newary = eval( cmdq( "ruby lua-parser/lua2sexp -a #{newpath}" ) )
+    newary = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -a #{newpath}" ) )
     if typeof(oldary) != Array or typeof(newary) != Array then
       # todo : fallback mode
       raise "cannot parse the file: #{oldpath}, #{newpath}"
     end
-    newcom = eval( cmdq( "ruby lua-parser/lua2sexp -c #{newpath}" ) )
+    newcom = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -c #{newpath}" ) )
     if typeof(oldcom) != Array or typeof(newcom) != Array then 
       raise "cannot parse the file comment: #{oldpath}, #{newpath}"
     end

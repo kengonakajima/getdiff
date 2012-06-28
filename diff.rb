@@ -1,6 +1,5 @@
-require "rumino/rumino"
-
-require "./lua"
+require "#{File.dirname(__FILE__)}/rumino/rumino"
+require "#{File.dirname(__FILE__)}/lua"
 require "pp"
 
 # magics
@@ -31,7 +30,6 @@ when ".lua"
   out = l.diff()
   pp out
     
-when ".js"
 else
   raise "invalid file extention:#{en}"
 end
