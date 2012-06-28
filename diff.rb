@@ -4,7 +4,7 @@ require "./lua"
 require "pp"
 
 # magics
-cmd( "ulimit -s unlimited > /dev/null 2>&1")
+cmdq( "ulimit -s unlimited > /dev/null 2>&1")
 $KCODE='u'
 
 
