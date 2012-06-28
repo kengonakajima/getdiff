@@ -1,0 +1,9 @@
+[submodule "rumino"]
+	path = rumino
+	url = git@github.com:kengonakajima/rumino.git
+[submodule "lua-parser"]
+	path = lua-parser
+	url = git@github.com:kengonakajima/lua-parser
+[submodule "js-parser"]
+	path = js-parser
+	url = git@github.com:kengonakajima/js-parser
