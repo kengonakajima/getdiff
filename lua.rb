@@ -62,7 +62,8 @@ class LuaDiffEngine
       when "gfuncdef"
         oldfuncs[v.name]=v
       when "funcdef"
-        oldfuncs[v.name]=v
+        longname = v.up + "." + v.name
+        oldfuncs[longname]=v
       when "total"
         oldtotal = v.cnt
       when "call"
@@ -90,14 +91,22 @@ class LuaDiffEngine
           end
         end
       when "gfuncdef", "funcdef"
-        if !oldfuncs[v.name] then
-          out[:newfuncs].push({ :name=>v.name, :cnt=>v.cnt})
+        longname = v.name
+        if v.up then
+          longname = v.up + "." + v.name
+        end
+        if !oldfuncs[longname] then
+          out[:newfuncs].push({ :name=>longname, :cnt=>v.cnt})
         else
           oldcnt=0
-          if oldfuncs[v.name] then
-            oldcnt = oldfuncs[v.name].cnt
+          if oldfuncs[longname] then
+            oldcnt = oldfuncs[longname].cnt
           end     
-          out[:funcsizes].push( { :name=>v.name, :diff=> (v.cnt - oldcnt ) } )
+          d = v.cnt - oldcnt
+          if d!=0 then
+            pp v
+            out[:funcsizes].push( { :name=>longname, :diff=> (v.cnt - oldcnt ) } )
+          end
         end
       when "comment"
         if !oldcoms[v.sha1] then
@@ -152,10 +161,14 @@ class LuaDiffEngine
     upary.shift if upary and upary[0] == :_G
     curary.shift if upary  # omit local var name typically
 
+    pp "UUUUUUU",up,cur
+    pp "UPARY",upary
+    pp "CUARY",curary
+
     if upary then
-      @outary.push( {:action=>"funcdef", :up=>upary[0], :name=>curary[0], :cnt=>cnt, :sha1=>md } )
+      @outary.push( {:action=>"funcdef", :up=>upary.join("."), :name=>curary.join("."), :cnt=>cnt, :sha1=>md } )
     else
-      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>curary[0],:cnt=>cnt, :sha1=>md } )
+      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>curary.join("."),:cnt=>cnt, :sha1=>md } )
     end
   end
 
@@ -174,16 +187,16 @@ class LuaDiffEngine
     when :function 
       fname,fb = ary[1],ary[2]
       if fname then
-        if $uppername then 
-          origun = $uppername.dup
+        if @uppername then 
+          origun = @uppername.dup
         else
           origun = nil
         end
-        pushDefn($uppername,fname, deepcount(fb), sha1(fb.to_s) )
-        $uppername = fname
+        pushDefn(@uppername,fname, deepcount(fb), sha1(fb.to_s) )
+        @uppername = fname
       end
       scan(d+1,fb)
-      $uppername = origun
+      @uppername = origun
     when :funcbody
       pl,blk = ary[1],ary[2]
       scan(d+1,blk)
