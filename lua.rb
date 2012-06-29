@@ -17,9 +17,11 @@ class LuaDiffEngine
 
   def initialize(oldpath,newpath)
     if oldpath then
+      @action = "update"
       oldary = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -a #{oldpath}" ) )
       oldcom = eval( cmdq( "ruby #{File.dirname(__FILE__)}/lua-parser/lua2sexp -c #{oldpath}" ) )
     else
+      @action = "new"
       oldary=[]
       oldcom=[:comments]
     end    
@@ -78,7 +80,7 @@ class LuaDiffEngine
       end
     end
 
-    out={ :newrequires=>[], :newstrs=>[], :newfuncs=>[], :funcsizes=>[], :newcomments=>[], :totaldiff=>0, :calls=>[], :names=>[] }
+    out={ :newrequires=>[], :newstrs=>[], :newfuncs=>[], :funcsizes=>[], :newcomments=>[], :totaldiff=>0, :calls=>[], :names=>[], :action=>@action }
     newreqs={}
 
     @newstat.each do |v|
