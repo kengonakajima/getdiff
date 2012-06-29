@@ -50,3 +50,6 @@ end
 function samefunc()
   a()  
 end
+
+a,b,c = 1,2,3
+a.b = c.d

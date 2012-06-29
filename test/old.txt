@@ -1,0 +1,25 @@
+以下の点に注意:
+
+3つの制御式はループが始まる前に一度だけ評価される。これらは数値でなければならない。
+_var、_limit、_step は見えない変数である。 この名前は説明のために用いられているだけである。
+もし三番目の式 (ステップ) が省略されたら、1が使われる。
+for ループを脱出するためには break を使う。
+ループ変数 var はループ内でローカルである。 for 文の外側でその値を使うことはできない。 もしループ変数 var の値が必要なら、 ループを出る前に別の変数に代入する必要がある。
+汎用 for 文は イテレータ と呼ばれる関数を通して働く。 それぞれの繰り返しについて、新しい値を生成するためにイテレータ関数が呼ばれ、nil になったところで止まる。 汎用 for ループは以下の構文である。
+
+	stat ::= for Name {`,´ Name} in explist1 do block end
+次のような for 文
+
+       for var_1, ..., var_n in explist do block end
+は次のコードと等価である。
+       do
+         local _f, _s, _var = explist
+         while true do
+           local var_1, ... , var_n = _f(_s, _var)
+           _var = var_1
+           if _var == nil then break end
+           block
+         end
+       end
+
+       

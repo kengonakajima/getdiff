@@ -1,5 +1,6 @@
 require "#{File.dirname(__FILE__)}/rumino/rumino"
 require "#{File.dirname(__FILE__)}/lua"
+require "#{File.dirname(__FILE__)}/txt"
 require "pp"
 
 # magics
@@ -24,14 +25,14 @@ when 2
   oldpath, newpath = ARGV[0], ARGV[1]  
 end
 
-case File.extname(ARGV[0])
+case e=File.extname(ARGV[0])
 when ".lua"
   l = LuaDiffEngine.new(oldpath, newpath )
-  out = l.diff()
-  pp out
-    
+  pp l.diff()
 else
-  raise "invalid file extention:#{en}"
+  p "unknown file extention: '#{e}' assume text file."
+  t = TextDiffEngine.new(oldpath,newpath)
+  pp t.diff()
 end
 
 

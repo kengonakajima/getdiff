@@ -37,12 +37,8 @@ class LuaDiffEngine
 
 #    pp oldary
 
-    
-
     @oldstat = getStat(oldary,oldcom)
     @newstat = getStat(newary,newcom)
-
-
   end
 
   def diff()
@@ -56,6 +52,7 @@ class LuaDiffEngine
     oldfuncs={}
     oldtotal=nil
     oldcalls=Hash.new(0)
+    oldnames=Hash.new(0)
     @oldstat.each do |v|
 #      pp v
       case v.action 
@@ -74,13 +71,16 @@ class LuaDiffEngine
         oldcalls[v.name] = v.cnt
       when "comment"
         oldcoms[v.sha1]=v
+      when "name"
+        oldnames[v.name] = v.cnt
       else 
         raise "unknown action:#{v.action}"
       end
     end
 
-    out={ :newrequires=>[], :newstrs=>[], :newfuncs=>[], :funcsizes=>[], :newcomments=>[], :totaldiff=>0, :calls=>[] }
+    out={ :newrequires=>[], :newstrs=>[], :newfuncs=>[], :funcsizes=>[], :newcomments=>[], :totaldiff=>0, :calls=>[], :names=>[] }
     newreqs={}
+
     @newstat.each do |v|
       case v.action
       when "require"
@@ -124,6 +124,11 @@ class LuaDiffEngine
         if d != 0 then
           out[:calls].push( { :name=>v.name, :diff=>d } )
         end
+      when "name"
+        d = v.cnt - oldnames[v.name]
+        if d != 0 then
+          out[:names].push( { :name=>v.name, :diff=>d } )
+        end
       end
     end
 
@@ -133,6 +138,8 @@ class LuaDiffEngine
   def getStat(ary,com)
     @funccache = Hash.new(0)
     @calls=Hash.new(0)
+    @names=Hash.new(0)
+
     @outary=[]
     @uppername = nil
     scan(0,ary)
@@ -141,12 +148,15 @@ class LuaDiffEngine
     @calls.valsort.reverse.each do |name,cnt|
       @outary.push( { :action=>"call", :name=>name, :cnt => cnt } )
     end
+    @names.valsort.reverse.each do |name,cnt|
+      @outary.push( { :action=>"name", :name=>name, :cnt => cnt })
+    end
 
     com[1..-1].each do |c|
       content = c[1]
       @outary.push( { :action=>"comment", :val=>content, :sha1=>sha1(content) } )
     end
-
+    
     return @outary
   end
 
@@ -235,7 +245,6 @@ class LuaDiffEngine
           else
             lastname = pf[1][1][-1].to_s
           end
-          #        print "CALL-LASTNAME:", lastname, "\n"
           @calls[lastname]+=1
         end
       end
@@ -243,6 +252,10 @@ class LuaDiffEngine
       explist = args[1]
       if explist then
         explist[1..-1].each do |e| scan(d+1,e) end
+      end
+    when :name
+      ary[1..-1].each do |nm|
+        @names[nm]+=1
       end
     when :str
       s=ary[1]
