@@ -31,7 +31,7 @@ when ".lua"
   l = LuaDiffEngine.new(oldpath, newpath )
   pp l.diff()
 else
-  p "unknown file extention: '#{e}' assume text file."
+#  p "unknown file extention: '#{e}' assume text file."
   t = TextDiffEngine.new(oldpath,newpath)
   pp t.diff()
 end
