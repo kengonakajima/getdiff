@@ -104,7 +104,6 @@ class LuaDiffEngine
           end     
           d = v.cnt - oldcnt
           if d!=0 then
-            pp v
             out[:funcsizes].push( { :name=>longname, :diff=> (v.cnt - oldcnt ) } )
           end
         end
@@ -159,10 +158,6 @@ class LuaDiffEngine
 
     curary.shift if curary[0] == :_G
     upary.shift if upary and upary[0] == :_G
-
-    pp "UUUUUUU",up,cur
-    pp "UPARY",upary
-    pp "CUARY",curary
 
     if upary then
       @outary.push( {:action=>"funcdef", :up=>upary.join("."), :name=>curary.join("."), :cnt=>cnt, :sha1=>md } )
