@@ -7,3 +7,7 @@ lua:
 txt:
 	ruby diff.rb test/old.txt
 	ruby diff.rb test/old.txt test/new.txt
+
+rb:
+	ruby diff.rb test/old.rb
+	ruby diff.rb test/old.rb test/new.rb
