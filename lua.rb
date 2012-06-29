@@ -37,8 +37,12 @@ class LuaDiffEngine
 
 #    pp oldary
 
+    
+
     @oldstat = getStat(oldary,oldcom)
     @newstat = getStat(newary,newcom)
+
+
   end
 
   def diff()
@@ -127,6 +131,7 @@ class LuaDiffEngine
   end
 
   def getStat(ary,com)
+    @funccache = Hash.new(0)
     @calls=Hash.new(0)
     @outary=[]
     @uppername = nil
@@ -162,7 +167,15 @@ class LuaDiffEngine
     if upary then
       @outary.push( {:action=>"funcdef", :up=>upary.join("."), :name=>curary.join("."), :cnt=>cnt, :sha1=>md } )
     else
-      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>curary.join("."),:cnt=>cnt, :sha1=>md } )
+      nm = curary.join(".")
+      @funccache[nm] += 1
+#      print "XXXXXXX: #{nm}", @funccache[nm], "\n"
+      if @funccache[nm] > 1 then
+        finname = nm + "#"+ @funccache[nm].to_s
+      else
+        finname = nm
+      end
+      @outary.push( {:action=>"gfuncdef", :up=>nil, :name=>finname, :cnt=>cnt, :sha1=>md } )
     end
   end
 

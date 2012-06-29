@@ -38,3 +38,10 @@ function Hoge()
   end
   
 end
+
+function samefunc()
+end
+function samefunc()
+end
+function samefunc()
+end

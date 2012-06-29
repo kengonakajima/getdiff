@@ -40,3 +40,13 @@ end
 
 call2()
 call2()
+
+function samefunc()
+  a()
+end
+function samefunc()
+  a()  
+end
+function samefunc()
+  a()  
+end
