@@ -123,14 +123,10 @@ class LuaDiffEngine
         out[:totaldiff] = v.cnt - oldtotal
       when "call"
         d = v.cnt - oldcalls[v.name]
-        if d != 0 then
-          out[:calls].push( { :name=>v.name, :diff=>d } )
-        end
+        out[:calls].push( { :name=>v.name, :diff=>d } )
       when "name"
         d = v.cnt - oldnames[v.name]
-        if d != 0 then
-          out[:names].push( { :name=>v.name, :diff=>d } )
-        end
+        out[:names].push( { :name=>v.name, :diff=>d } )
       end
     end
 
