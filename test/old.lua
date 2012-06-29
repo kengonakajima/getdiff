@@ -33,4 +33,8 @@ function Hoge()
     p("mmodify")
     p("mmmm")
   end
+
+  function t.a:b()
+  end
+  
 end

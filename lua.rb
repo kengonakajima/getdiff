@@ -159,7 +159,6 @@ class LuaDiffEngine
 
     curary.shift if curary[0] == :_G
     upary.shift if upary and upary[0] == :_G
-    curary.shift if upary  # omit local var name typically
 
     pp "UUUUUUU",up,cur
     pp "UPARY",upary

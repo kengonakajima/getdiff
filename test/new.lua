@@ -32,6 +32,10 @@ function Hoge()
     local a=1
     call3()
   end
+  function t.a:b()
+  end
+  function t.a:c()
+  end
 end
 
 call2()
