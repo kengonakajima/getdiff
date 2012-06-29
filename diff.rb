@@ -25,7 +25,8 @@ when 2
   oldpath, newpath = ARGV[0], ARGV[1]  
 end
 
-case e=File.extname(ARGV[0])
+e = File.extname(ARGV[0])
+case e
 when ".lua"
   l = LuaDiffEngine.new(oldpath, newpath )
   pp l.diff()
