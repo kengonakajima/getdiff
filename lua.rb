@@ -109,9 +109,7 @@ class LuaDiffEngine
             oldcnt = oldfuncs[longname].cnt
           end     
           d = v.cnt - oldcnt
-          if d!=0 then
-            out[:funcsizes].push( { :name=>longname, :diff=> (v.cnt - oldcnt ) } )
-          end
+          out[:funcsizes].push( { :name=>longname, :diff=> (v.cnt - oldcnt ) } )
         end
       when "comment"
         if !oldcoms[v.sha1] then
